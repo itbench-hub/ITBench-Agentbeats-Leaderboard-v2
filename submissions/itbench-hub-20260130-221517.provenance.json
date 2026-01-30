@@ -1,0 +1,17 @@
+{
+  "image_digests": {
+    "green-agent": "ghcr.io/noahzibm/it-evaluator@sha256:467d06da03f7d000fdc4523b6bbeefc3642f0a6cd66224508e4bddcd4beade19",
+    "agent": "ghcr.io/noahzibm/it-agent@sha256:52ba92cec421908934f6987b2ca9b4fc5591d1c202687eabad61a25c84684e16",
+    "agentbeats-client": "ghcr.io/agentbeats/agentbeats-client@sha256:13dfe3ef4e583a80e7ce2fe3becd0ce3b879841368a7f4fa40b6ebbabeeb014e"
+  },
+  "timestamp": "2026-01-30T22:15:17Z",
+  "github_actions": {
+    "run_url": "https://github.com/itbench-hub/ITBench-Agentbeats-Leaderboard-v2/actions/runs/21532201254",
+    "run_logs_url": "https://api.github.com/repos/itbench-hub/ITBench-Agentbeats-Leaderboard-v2/actions/runs/21532201254/logs",
+    "ref": "refs/heads/purple-agent",
+    "sha": "cdecac3ff48d715f50195586e507e77741ab9eef",
+    "repository_url": "https://github.com/itbench-hub/ITBench-Agentbeats-Leaderboard-v2",
+    "workflow_ref": "itbench-hub/ITBench-Agentbeats-Leaderboard-v2/.github/workflows/run-scenario.yml@refs/heads/purple-agent",
+    "workflow_sha": "cdecac3ff48d715f50195586e507e77741ab9eef"
+  }
+}
