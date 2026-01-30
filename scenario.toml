@@ -1,16 +1,11 @@
 [green_agent]
-agentbeats_id = ""
-env = { API_KEY = "${GITHUB_SECRET_NAME}", LOG_LEVEL = "INFO" }
+agentbeats_id = "019c0fc6-bf81-71c3-a566-1fad5a8fceec"
+env = { EVALUATOR_API_KEY = "${EVALUATOR_API_KEY}", LOG_LEVEL = "INFO" }
 
 [[participants]]
 agentbeats_id = ""
-name = "role_1_name"
-env = {}
-
-[[participants]]
-agentbeats_id = ""
-name = "role_2_name"
-env = {}
+name = "agent"
+env = { AGENT_API_KEY = "${AGENT_API_KEY}" }
 
 [config]
-# Add your assessment config here
+trials = 1
