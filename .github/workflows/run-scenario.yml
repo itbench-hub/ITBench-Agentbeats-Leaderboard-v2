@@ -5,6 +5,14 @@ on:
     paths:
       - 'scenario.toml'
 
+env:
+  AGENT_MODEL: ${{ vars.AGENT_MODEL || 'google/gemini-3-flash-preview' }}
+  AGENT_PROVIDER: ${{ vars.AGENT_PROVIDER || 'openrouter' }}
+  AGENT_URL: ${{ vars.AGENT_URL || 'https://openrouter.ai/api/v1' }}
+  EVALUATOR_MODEL: ${{ vars.EVALUATOR_MODEL || 'google/gemini-3-pro-preview' }}
+  EVALUATOR_PROVIDER: ${{ vars.EVALUATOR_PROVIDER || 'openrouter' }}
+  EVALUATOR_URL: ${{ vars.EVALUATOR_URL || 'https://openrouter.ai/api/v1' }}
+
 jobs:
   run:
     runs-on: ubuntu-latest
@@ -48,6 +56,15 @@ jobs:
           SECRETS_JSON: ${{ toJSON(secrets) }}
         run: |
           echo "$SECRETS_JSON" | jq -r 'to_entries|map("\(.key)=\(.value)")|.[]' > .env
+
+      - name: Export config to .env
+        run: |
+          echo "AGENT_MODEL=$AGENT_MODEL" >> .env
+          echo "AGENT_PROVIDER=$AGENT_PROVIDER" >> .env
+          echo "AGENT_URL=$AGENT_URL" >> .env
+          echo "EVALUATOR_MODEL=$EVALUATOR_MODEL" >> .env
+          echo "EVALUATOR_PROVIDER=$EVALUATOR_PROVIDER" >> .env
+          echo "EVALUATOR_URL=$EVALUATOR_URL" >> .env
 
       - name: Check if GHCR_TOKEN is available
         id: check_ghcr
