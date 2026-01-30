@@ -8,4 +8,4 @@ name = "agent"
 env = { AGENT_API_KEY = "${AGENT_API_KEY}", AGENT_URL = "${AGENT_URL}", AGENT_PROVIDER = "${AGENT_PROVIDER}", AGENT_MODEL = "${AGENT_MODEL}" }
 
 [config]
-trials = 2
+trials = 1
