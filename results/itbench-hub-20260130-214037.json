@@ -1,0 +1,851 @@
+{
+  "participants": {
+    "agent": "019c100a-630f-71d0-aeff-cb5811bf6de4"
+  },
+  "results": [
+    {
+      "scenarios_evaluated": 2,
+      "time_used": 169.96137976646423,
+      "agent_outputs": {
+        "scenarios": {
+          "Scenario-1": {
+            "entities": [
+              {
+                "name": "kube-system/Service/kube-apiserver",
+                "contributing_factor": true,
+                "reasoning": "The KubeClientCertificateExpiration alert indicates the API server's certificate is expiring in < 24 hours, causing cluster-wide authentication instability.",
+                "evidence": "KubeClientCertificateExpiration alert reached Critical status for 10.0.166.142:443."
+              },
+              {
+                "name": "kube-system/Pod/kube-controller-manager",
+                "contributing_factor": false,
+                "reasoning": "The controller manager is down/undiscoverable, likely due to the API server authentication failures or control plane instability.",
+                "evidence": "KubeControllerManagerDown alert triggered starting at 17:38."
+              },
+              {
+                "name": "kube-system/Pod/kube-scheduler",
+                "contributing_factor": false,
+                "reasoning": "The scheduler disappeared from Prometheus discovery, indicating it is failing to communicate or has crashed.",
+                "evidence": "KubeSchedulerDown alert triggered at 17:38."
+              },
+              {
+                "name": "prometheus/Pod/prometheus",
+                "contributing_factor": false,
+                "reasoning": "Prometheus lost connectivity to Alertmanager, likely due to networking or auth issues caused by the control plane state.",
+                "evidence": "PrometheusNotConnectedToAlertmanagers alert is firing."
+              },
+              {
+                "name": "otel-demo/Deployment/frontend-proxy",
+                "contributing_factor": false,
+                "reasoning": "This service is the primary entry point experiencing the most severe latency (15,000s) and highest error rates.",
+                "evidence": "Latency of 15,000s and RequestErrorRate peaking at 18.7."
+              },
+              {
+                "name": "otel-demo/Deployment/frontend",
+                "contributing_factor": false,
+                "reasoning": "The frontend service is experiencing high error rates and severe resource starvation due to CPU throttling.",
+                "evidence": "CPUThrottlingHigh at 89.25% and RequestErrorRate between 0.8 and 1.6."
+              },
+              {
+                "name": "otel-demo/Deployment/product-catalog",
+                "contributing_factor": false,
+                "reasoning": "Resource starvation is impacting the catalog service, leading to cascaded application failures.",
+                "evidence": "CPUThrottlingHigh alert at 33.54%."
+              },
+              {
+                "name": "otel-demo/Deployment/checkout",
+                "contributing_factor": false,
+                "reasoning": "Impacted by upstream service degradation and control plane instability, showing elevated error rates.",
+                "evidence": "RequestErrorRate alert between 0.4 and 0.8."
+              }
+            ],
+            "propagations": [
+              {
+                "source": "kube-system/Service/kube-apiserver",
+                "target": "kube-system/Pod/kube-controller-manager",
+                "condition": "Certificate expiration and authentication instability",
+                "effect": "Component becomes unavailable and falls out of target discovery."
+              },
+              {
+                "source": "kube-system/Service/kube-apiserver",
+                "target": "otel-demo/Deployment/frontend",
+                "condition": "Control plane instability leading to scheduling or resource management issues",
+                "effect": "Severe CPU throttling (89%) and high request error rates."
+              },
+              {
+                "source": "otel-demo/Deployment/frontend",
+                "target": "otel-demo/Deployment/frontend-proxy",
+                "condition": "Failure of backend pod to process requests timely",
+                "effect": "Extreme latency of 15,000s and peak error rates in the proxy."
+              },
+              {
+                "source": "otel-demo/Deployment/product-catalog",
+                "target": "otel-demo/Deployment/checkout",
+                "condition": "Resource starvation (CPU throttling)",
+                "effect": "Downstream checkout service experiences increased RequestErrorRate."
+              }
+            ],
+            "alerts_explained": [
+              {
+                "alert": "KubeClientCertificateExpiration",
+                "explanation": "The API server client certificate is expiring within 24 hours, leading to service communication failures.",
+                "explained": true
+              },
+              {
+                "alert": "KubeControllerManagerDown",
+                "explanation": "Core control plane component is unreachable by Prometheus, likely due to the certificate/auth issue.",
+                "explained": true
+              },
+              {
+                "alert": "CPUThrottlingHigh",
+                "explanation": "Containers are being restricted by the CGroup due to exceeding limits or underlying node resource contention.",
+                "explained": true
+              },
+              {
+                "alert": "PrometheusNotConnectedToAlertmanagers",
+                "explanation": "Network partition or service-mesh auth failure preventing Prometheus from sending alerts.",
+                "explained": true
+              },
+              {
+                "alert": "RequestErrorRate",
+                "explanation": "Application services are returning non-2xx responses due to internal timeouts and resource starvation.",
+                "explained": true
+              }
+            ]
+          },
+          "Scenario-23": {
+            "entities": [
+              {
+                "name": "kube-system/APIServer/kube-apiserver",
+                "contributing_factor": true,
+                "reasoning": "The API server is identified as the root cause due to expiring client certificates (< 24h), leading to authentication failures for core components.",
+                "evidence": "KubeClientCertificateExpiration alert firing at Critical level for API server IP 10.0.152.167."
+              },
+              {
+                "name": "kube-system/Service/kube-scheduler",
+                "contributing_factor": false,
+                "reasoning": "The scheduler is down because it can no longer authenticate with the API server or has been partitioned due to the certificate issue.",
+                "evidence": "KubeSchedulerDown alert firing; component disappeared from Prometheus discovery."
+              },
+              {
+                "name": "kube-system/Service/kube-controller-manager",
+                "contributing_factor": false,
+                "reasoning": "The controller manager is down as a downstream effect of the API server authentication failure.",
+                "evidence": "KubeControllerManagerDown alert firing; component target is missing in Prometheus."
+              },
+              {
+                "name": "otel-demo/Deployment/frontend-proxy",
+                "contributing_factor": false,
+                "reasoning": "Experienced the highest increase in error rates (up to 4.4%), likely due to instability in the control plane affecting service routing or discovery.",
+                "evidence": "RequestErrorRate warning alert showing an increase from 1.1% to 4.4%."
+              },
+              {
+                "name": "otel-demo/Deployment/recommendation",
+                "contributing_factor": false,
+                "reasoning": "Impacted service showing elevated error rates consistent with cluster-wide control plane instability.",
+                "evidence": "RequestErrorRate warning alert at ~1.1%."
+              },
+              {
+                "name": "otel-demo/Deployment/fraud-detection",
+                "contributing_factor": false,
+                "reasoning": "Impacted service showing consistent error rates during the control plane degradation.",
+                "evidence": "RequestErrorRate warning alert at ~1.0%."
+              },
+              {
+                "name": "otel-demo/Deployment/ad",
+                "contributing_factor": false,
+                "reasoning": "Microservice impacted by the general system instability, resulting in latent request errors.",
+                "evidence": "RequestErrorRate warning alert at ~1.1% detected at 17:44."
+              },
+              {
+                "name": "monitoring/Deployment/prometheus",
+                "contributing_factor": false,
+                "reasoning": "The monitoring pipeline is impaired, specifically its connection to the notification layer, though the server remains operational.",
+                "evidence": "PrometheusNotConnectedToAlertmanagers alert; Watchdog alert active."
+              }
+            ],
+            "propagations": [
+              {
+                "source": "kube-system/APIServer/kube-apiserver",
+                "target": "kube-system/Service/kube-scheduler",
+                "condition": "Client certificate expiration preventing secure communication.",
+                "effect": "Scheduler disconnects from the control plane and stops functioning."
+              },
+              {
+                "source": "kube-system/APIServer/kube-apiserver",
+                "target": "kube-system/Service/kube-controller-manager",
+                "condition": "Client certificate expiration causing authentication failure.",
+                "effect": "Controller manager goes down, halting cluster state reconciliation."
+              },
+              {
+                "source": "kube-system/Service/kube-controller-manager",
+                "target": "otel-demo/Deployment/frontend-proxy",
+                "condition": "Loss of control plane management for endpoints and service state.",
+                "effect": "Elevated RequestErrorRate reaching 4.4% due to stale or failing network routes."
+              }
+            ],
+            "alerts_explained": [
+              {
+                "alert": "KubeClientCertificateExpiration",
+                "explanation": "Critical alert indicating Kubernetes API client certificates will expire in less than 24 hours, breaking component authentication.",
+                "explained": true
+              },
+              {
+                "alert": "KubeSchedulerDown",
+                "explanation": "The Kubernetes Scheduler is unreachable, preventing new pod scheduling and cluster management.",
+                "explained": true
+              },
+              {
+                "alert": "KubeControllerManagerDown",
+                "explanation": "The Controller Manager is offline, stopping lifecycle management of deployments and nodes.",
+                "explained": true
+              },
+              {
+                "alert": "PrometheusNotConnectedToAlertmanagers",
+                "explanation": "Prometheus cannot route alerts to Alertmanager, potentially causing notification delays during the incident.",
+                "explained": true
+              },
+              {
+                "alert": "RequestErrorRate",
+                "explanation": "Service-level metric indicating a percentage of failed requests in the microservices mesh.",
+                "explained": true
+              },
+              {
+                "alert": "InfoInhibitor",
+                "explanation": "Alert suppression mechanism firing due to the volume of higher-severity alerts in the cluster.",
+                "explained": true
+              },
+              {
+                "alert": "Watchdog",
+                "explanation": "A heartbeat alert confirming that the Prometheus instance is still running and processing rules.",
+                "explained": true
+              }
+            ]
+          }
+        }
+      },
+      "evaluation_results": {
+        "raw_results": [
+          {
+            "scenario_index": 0,
+            "scores": {
+              "root_cause_entity": {
+                "gt_entities": [
+                  "load-generator-pod-1"
+                ],
+                "predicted_entities": [
+                  {
+                    "entity": "kube-system/Service/kube-apiserver",
+                    "matches_gt": false
+                  }
+                ],
+                "calculation_precision": 0.0,
+                "calculation_recall": 0.0,
+                "calculation_f1": 0,
+                "justification": "The Ground Truth identifies 'load-generator-pod-1' (and its aliases, including 'frontend-proxy-service-1') as the root cause. The model predicted 'kube-system/Service/kube-apiserver' as the contributing factor, which does not match the ground truth."
+              },
+              "root_cause_reasoning": {
+                "calculation": 0,
+                "justification": "No root cause entities were correctly identified, so the reasoning score is 0.",
+                "details": {}
+              },
+              "propagation_chain": {
+                "justification": "The model's propagation chain was flattened into a sequence of semantic components. The Ground Truth path is ['Load Generator Component', 'Frontend Proxy Component']. The model's path includes 'Frontend Proxy Component', resulting in 1 True Positive (LCS length). The model path length is 7 (due to multiple branches flattened), and GT path length is 2.",
+                "details": {
+                  "normalization_map": {
+                    "otel-demo/Deployment/frontend-proxy": "frontend-proxy-service-1",
+                    "otel-demo/Deployment/frontend": "frontend-service",
+                    "otel-demo/Deployment/product-catalog": "product-catalog-service",
+                    "otel-demo/Deployment/checkout": "checkout-service",
+                    "kube-system/Service/kube-apiserver": "kube-apiserver",
+                    "kube-system/Pod/kube-controller-manager": "kube-controller-manager"
+                  },
+                  "semantic_components": {
+                    "Load Generator Component": [
+                      "load-generator-pod-1",
+                      "load-generator-service-1"
+                    ],
+                    "Frontend Proxy Component": [
+                      "frontend-proxy-service-1",
+                      "frontend-proxy-pod-1"
+                    ],
+                    "Kube Apiserver Component": [
+                      "kube-apiserver"
+                    ],
+                    "Kube Controller Manager Component": [
+                      "kube-controller-manager"
+                    ],
+                    "Frontend Component": [
+                      "frontend-service"
+                    ],
+                    "Product Catalog Component": [
+                      "product-catalog-service"
+                    ],
+                    "Checkout Component": [
+                      "checkout-service"
+                    ]
+                  },
+                  "contracted_gt_path": [
+                    "Load Generator Component",
+                    "Frontend Proxy Component"
+                  ],
+                  "contracted_model_path": [
+                    "Kube Apiserver Component",
+                    "Kube Controller Manager Component",
+                    "Kube Apiserver Component",
+                    "Frontend Component",
+                    "Frontend Proxy Component",
+                    "Product Catalog Component",
+                    "Checkout Component"
+                  ],
+                  "lcs_components": [
+                    "Frontend Proxy Component"
+                  ],
+                  "true_positives_TP": 1,
+                  "model_path_length": 7,
+                  "gt_path_length": 2
+                },
+                "precision": 0.14285714285714285,
+                "recall": 0.5,
+                "calculation": 0.22222222222222224
+              },
+              "fault_localization_component_identification": {
+                "calculation": 1,
+                "justification": "The first performance failure in GT.propagations is 'frontend-proxy service error rate is above threshold'. Using Priority 1 (Explicit Component), the first impacted component is 'Frontend Proxy Component'. This component was found in the model's contracted path.",
+                "details": {
+                  "gt_first_impacted_component": "Frontend Proxy Component",
+                  "effect_used": "frontend-proxy service error rate is above threshold",
+                  "priority_rule_applied": "Priority 1",
+                  "found_in_model_path": true
+                }
+              },
+              "root_cause_reasoning_partial": {
+                "calculation": 0,
+                "justification": "The model's root cause entity 'Kube Apiserver Component' is not on the contracted GT path, so no partial credit can be calculated.",
+                "details": [
+                  {
+                    "entity": "kube-system/Service/kube-apiserver",
+                    "metric1_is_correct": false,
+                    "hop_away": null,
+                    "SymptomReasoningCorrectness": null,
+                    "entity_score": 0
+                  }
+                ]
+              },
+              "root_cause_proximity_no_fp": {
+                "calculation_precision": 0.0,
+                "calculation_recall": 0.3333333333333333,
+                "calculation_f1": 0,
+                "justification": "Precision is 0 because the model's root cause 'Kube Apiserver Component' is not on the GT path. Recall is calculated because the GT root cause alias 'Frontend Proxy Component' is on the model path, 2 hops away from the model root cause (Apiserver -> Frontend -> FrontendProxy). Score = 1/(1+2) = 0.33.",
+                "precision_details": [
+                  {
+                    "entity": "kube-system/Service/kube-apiserver",
+                    "is_on_path": false,
+                    "hop_away": null,
+                    "entity_score": 0
+                  }
+                ],
+                "recall_details": [
+                  {
+                    "gt_entity": "load-generator-pod-1 (Alias Group)",
+                    "is_on_path": true,
+                    "hop_away": 2,
+                    "entity_score": 0.3333333333333333
+                  }
+                ]
+              },
+              "root_cause_proximity_with_fp": {
+                "gt_path_length": 2,
+                "calculation_precision": 0.0,
+                "calculation_recall": 0.5,
+                "calculation_f1": 0,
+                "justification": "Precision is 0 as the model root cause is off-path. Recall uses the distance of 2 hops normalized by GT path length 2. Score = 1 / (1 + 2/2) = 0.5.",
+                "precision_details": [
+                  {
+                    "entity": "kube-system/Service/kube-apiserver",
+                    "is_on_path": false,
+                    "hop_away": null,
+                    "entity_score": 0
+                  }
+                ],
+                "recall_details": [
+                  {
+                    "gt_entity": "load-generator-pod-1 (Alias Group)",
+                    "is_on_path": true,
+                    "hop_away": 2,
+                    "entity_score": 0.5
+                  }
+                ]
+              },
+              "root_cause_entity_k": {
+                "calculation_precision": 0.0,
+                "calculation_recall": 0.0,
+                "calculation_f1": 0.0
+              },
+              "root_cause_entity_k@1": {
+                "calculation_precision": 0.0,
+                "calculation_recall": 0.0,
+                "calculation_f1": 0.0
+              },
+              "root_cause_entity_k@2": {
+                "calculation_precision": 0.0,
+                "calculation_recall": 0.0,
+                "calculation_f1": 0.0
+              },
+              "root_cause_entity_k@3": {
+                "calculation_precision": 0.0,
+                "calculation_recall": 0.0,
+                "calculation_f1": 0.0
+              },
+              "root_cause_entity_k@4": {
+                "calculation_precision": 0.0,
+                "calculation_recall": 0.0,
+                "calculation_f1": 0.0
+              },
+              "root_cause_entity_k@5": {
+                "calculation_precision": 0.0,
+                "calculation_recall": 0.0,
+                "calculation_f1": 0.0
+              }
+            },
+            "incident_id": "1",
+            "trial_id": "1"
+          },
+          {
+            "scenario_index": 0,
+            "scores": {
+              "root_cause_entity": {
+                "gt_entities": [
+                  "checkout-pod-1"
+                ],
+                "predicted_entities": [
+                  {
+                    "entity": "kube-system/APIServer/kube-apiserver",
+                    "matches_gt": false
+                  }
+                ],
+                "calculation_precision": 0.0,
+                "calculation_recall": 0.0,
+                "calculation_f1": 0,
+                "justification": "The Ground Truth identifies 'checkout-pod-1' (and its alias 'checkout-service-1') as the root cause. The model predicted 'kube-system/APIServer/kube-apiserver', which does not match any entity in the Ground Truth."
+              },
+              "root_cause_reasoning": {
+                "calculation": 0,
+                "justification": "No root cause entities were correctly identified, so the reasoning score is 0.",
+                "details": {}
+              },
+              "propagation_chain": {
+                "justification": "The model describes a control plane failure (APIServer -> Scheduler -> Controller Manager -> Frontend Proxy), whereas the Ground Truth describes a specific pod failure in the checkout service (Checkout Pod -> Checkout Service). There is no overlap in the semantic components or the path.",
+                "details": {
+                  "normalization_map": {},
+                  "semantic_components": {
+                    "Checkout Service Component": [
+                      "checkout-pod-1",
+                      "checkout-service-1"
+                    ],
+                    "Kube APIServer Component": [
+                      "kube-system/APIServer/kube-apiserver"
+                    ],
+                    "Kube Scheduler Component": [
+                      "kube-system/Service/kube-scheduler"
+                    ],
+                    "Kube Controller Manager Component": [
+                      "kube-system/Service/kube-controller-manager"
+                    ],
+                    "Frontend Proxy Component": [
+                      "otel-demo/Deployment/frontend-proxy"
+                    ]
+                  },
+                  "contracted_gt_path": [
+                    "Checkout Service Component"
+                  ],
+                  "contracted_model_path": [
+                    "Kube APIServer Component",
+                    "Kube Scheduler Component",
+                    "Kube Controller Manager Component",
+                    "Frontend Proxy Component"
+                  ],
+                  "lcs_components": [],
+                  "true_positives_TP": 0,
+                  "model_path_length": 4,
+                  "gt_path_length": 1
+                },
+                "precision": 0.0,
+                "recall": 0.0,
+                "calculation": 0
+              },
+              "fault_localization_component_identification": {
+                "calculation": 0,
+                "justification": "The first performance failure in GT.propagations has an empty effect string. Using Priority 4 (Default to Target), the first impacted component is 'Checkout Service Component' (target: checkout-service-1). This component was not found in the model's contracted path.",
+                "details": {
+                  "gt_first_impacted_component": "Checkout Service Component",
+                  "effect_used": "",
+                  "priority_rule_applied": "Priority 4",
+                  "found_in_model_path": false
+                }
+              },
+              "root_cause_reasoning_partial": {
+                "calculation": 0,
+                "justification": "The model's root cause entity 'kube-system/APIServer/kube-apiserver' (Kube APIServer Component) is not present on the contracted Ground Truth path. Therefore, no partial credit is awarded.",
+                "details": [
+                  {
+                    "entity": "kube-system/APIServer/kube-apiserver",
+                    "metric1_is_correct": false,
+                    "hop_away": null,
+                    "SymptomReasoningCorrectness": null,
+                    "entity_score": 0
+                  }
+                ]
+              },
+              "root_cause_proximity_no_fp": {
+                "calculation_precision": 0.0,
+                "calculation_recall": 0.0,
+                "calculation_f1": 0,
+                "justification": "The model's predicted root cause component ('Kube APIServer Component') is not on the Ground Truth path, resulting in a precision score of 0. The Ground Truth root cause component ('Checkout Service Component') is not on the model's path, resulting in a recall score of 0.",
+                "precision_details": [
+                  {
+                    "entity": "kube-system/APIServer/kube-apiserver",
+                    "is_on_path": false,
+                    "hop_away": null,
+                    "entity_score": 0
+                  }
+                ],
+                "recall_details": [
+                  {
+                    "gt_entity": "checkout-pod-1",
+                    "is_on_path": false,
+                    "hop_away": null,
+                    "entity_score": 0
+                  }
+                ]
+              },
+              "root_cause_proximity_with_fp": {
+                "gt_path_length": 1,
+                "calculation_precision": 0.0,
+                "calculation_recall": 0.0,
+                "calculation_f1": 0,
+                "justification": "The model's predicted root cause component is not on the Ground Truth path (score 0). The Ground Truth root cause component is not on the model's path (score 0).",
+                "precision_details": [
+                  {
+                    "entity": "kube-system/APIServer/kube-apiserver",
+                    "is_on_path": false,
+                    "hop_away": null,
+                    "entity_score": 0
+                  }
+                ],
+                "recall_details": [
+                  {
+                    "gt_entity": "checkout-pod-1",
+                    "is_on_path": false,
+                    "hop_away": null,
+                    "entity_score": 0
+                  }
+                ]
+              },
+              "root_cause_entity_k": {
+                "calculation_precision": 0.0,
+                "calculation_recall": 0.0,
+                "calculation_f1": 0.0
+              },
+              "root_cause_entity_k@1": {
+                "calculation_precision": 0.0,
+                "calculation_recall": 0.0,
+                "calculation_f1": 0.0
+              },
+              "root_cause_entity_k@2": {
+                "calculation_precision": 0.0,
+                "calculation_recall": 0.0,
+                "calculation_f1": 0.0
+              },
+              "root_cause_entity_k@3": {
+                "calculation_precision": 0.0,
+                "calculation_recall": 0.0,
+                "calculation_f1": 0.0
+              },
+              "root_cause_entity_k@4": {
+                "calculation_precision": 0.0,
+                "calculation_recall": 0.0,
+                "calculation_f1": 0.0
+              },
+              "root_cause_entity_k@5": {
+                "calculation_precision": 0.0,
+                "calculation_recall": 0.0,
+                "calculation_f1": 0.0
+              }
+            },
+            "incident_id": "23",
+            "trial_id": "1"
+          }
+        ],
+        "statistics": {
+          "per_incident": {
+            "1": {
+              "root_cause_entity_precision": {
+                "mean": 0.0,
+                "stderr": 0.0,
+                "n": 1
+              },
+              "root_cause_entity_recall": {
+                "mean": 0.0,
+                "stderr": 0.0,
+                "n": 1
+              },
+              "root_cause_entity_f1": {
+                "mean": 0.0,
+                "stderr": 0.0,
+                "n": 1
+              },
+              "root_cause_entity_k_precision": {
+                "mean": 0.0,
+                "stderr": 0.0,
+                "n": 1
+              },
+              "root_cause_entity_k_recall": {
+                "mean": 0.0,
+                "stderr": 0.0,
+                "n": 1
+              },
+              "root_cause_entity_k_f1": {
+                "mean": 0.0,
+                "stderr": 0.0,
+                "n": 1
+              },
+              "root_cause_reasoning": {
+                "mean": 0.0,
+                "stderr": 0.0,
+                "n": 1
+              },
+              "propagation_chain": {
+                "mean": 0.22222222222222224,
+                "stderr": 0.0,
+                "n": 1
+              },
+              "fault_localization_component_identification": {
+                "mean": 1.0,
+                "stderr": 0.0,
+                "n": 1,
+                "pass@1": 1.0
+              },
+              "root_cause_reasoning_partial": {
+                "mean": 0.0,
+                "stderr": 0.0,
+                "n": 1
+              },
+              "root_cause_proximity_no_fp_precision": {
+                "mean": 0.0,
+                "stderr": 0.0,
+                "n": 1
+              },
+              "root_cause_proximity_no_fp_recall": {
+                "mean": 0.3333333333333333,
+                "stderr": 0.0,
+                "n": 1
+              },
+              "root_cause_proximity_no_fp_f1": {
+                "mean": 0.0,
+                "stderr": 0.0,
+                "n": 1
+              },
+              "root_cause_proximity_with_fp_precision": {
+                "mean": 0.0,
+                "stderr": 0.0,
+                "n": 1
+              },
+              "root_cause_proximity_with_fp_recall": {
+                "mean": 0.5,
+                "stderr": 0.0,
+                "n": 1
+              },
+              "root_cause_proximity_with_fp_f1": {
+                "mean": 0.0,
+                "stderr": 0.0,
+                "n": 1
+              }
+            },
+            "23": {
+              "root_cause_entity_precision": {
+                "mean": 0.0,
+                "stderr": 0.0,
+                "n": 1
+              },
+              "root_cause_entity_recall": {
+                "mean": 0.0,
+                "stderr": 0.0,
+                "n": 1
+              },
+              "root_cause_entity_f1": {
+                "mean": 0.0,
+                "stderr": 0.0,
+                "n": 1
+              },
+              "root_cause_entity_k_precision": {
+                "mean": 0.0,
+                "stderr": 0.0,
+                "n": 1
+              },
+              "root_cause_entity_k_recall": {
+                "mean": 0.0,
+                "stderr": 0.0,
+                "n": 1
+              },
+              "root_cause_entity_k_f1": {
+                "mean": 0.0,
+                "stderr": 0.0,
+                "n": 1
+              },
+              "root_cause_reasoning": {
+                "mean": 0.0,
+                "stderr": 0.0,
+                "n": 1
+              },
+              "propagation_chain": {
+                "mean": 0.0,
+                "stderr": 0.0,
+                "n": 1
+              },
+              "fault_localization_component_identification": {
+                "mean": 0.0,
+                "stderr": 0.0,
+                "n": 1,
+                "pass@1": 0.0
+              },
+              "root_cause_reasoning_partial": {
+                "mean": 0.0,
+                "stderr": 0.0,
+                "n": 1
+              },
+              "root_cause_proximity_no_fp_precision": {
+                "mean": 0.0,
+                "stderr": 0.0,
+                "n": 1
+              },
+              "root_cause_proximity_no_fp_recall": {
+                "mean": 0.0,
+                "stderr": 0.0,
+                "n": 1
+              },
+              "root_cause_proximity_no_fp_f1": {
+                "mean": 0.0,
+                "stderr": 0.0,
+                "n": 1
+              },
+              "root_cause_proximity_with_fp_precision": {
+                "mean": 0.0,
+                "stderr": 0.0,
+                "n": 1
+              },
+              "root_cause_proximity_with_fp_recall": {
+                "mean": 0.0,
+                "stderr": 0.0,
+                "n": 1
+              },
+              "root_cause_proximity_with_fp_f1": {
+                "mean": 0.0,
+                "stderr": 0.0,
+                "n": 1
+              }
+            }
+          },
+          "overall": {
+            "root_cause_entity_precision": {
+              "mean": 0.0,
+              "stderr": 0.0,
+              "n_incidents": 2
+            },
+            "root_cause_entity_recall": {
+              "mean": 0.0,
+              "stderr": 0.0,
+              "n_incidents": 2
+            },
+            "root_cause_entity_f1": {
+              "mean": 0.0,
+              "stderr": 0.0,
+              "n_incidents": 2
+            },
+            "root_cause_entity_k_precision": {
+              "mean": 0.0,
+              "stderr": 0.0,
+              "n_incidents": 2
+            },
+            "root_cause_entity_k_recall": {
+              "mean": 0.0,
+              "stderr": 0.0,
+              "n_incidents": 2
+            },
+            "root_cause_entity_k_f1": {
+              "mean": 0.0,
+              "stderr": 0.0,
+              "n_incidents": 2
+            },
+            "root_cause_reasoning": {
+              "mean": 0.0,
+              "stderr": 0.0,
+              "n_incidents": 2
+            },
+            "propagation_chain": {
+              "mean": 0.11111111111111112,
+              "stderr": 0.11111111111111112,
+              "n_incidents": 2
+            },
+            "fault_localization_component_identification": {
+              "mean": 0.5,
+              "stderr": 0.5,
+              "n_incidents": 2,
+              "pass@1": 0.5
+            },
+            "root_cause_reasoning_partial": {
+              "mean": 0.0,
+              "stderr": 0.0,
+              "n_incidents": 2
+            },
+            "root_cause_proximity_no_fp_precision": {
+              "mean": 0.0,
+              "stderr": 0.0,
+              "n_incidents": 2
+            },
+            "root_cause_proximity_no_fp_recall": {
+              "mean": 0.16666666666666666,
+              "stderr": 0.16666666666666666,
+              "n_incidents": 2
+            },
+            "root_cause_proximity_no_fp_f1": {
+              "mean": 0.0,
+              "stderr": 0.0,
+              "n_incidents": 2
+            },
+            "root_cause_proximity_with_fp_precision": {
+              "mean": 0.0,
+              "stderr": 0.0,
+              "n_incidents": 2
+            },
+            "root_cause_proximity_with_fp_recall": {
+              "mean": 0.25,
+              "stderr": 0.25,
+              "n_incidents": 2
+            },
+            "root_cause_proximity_with_fp_f1": {
+              "mean": 0.0,
+              "stderr": 0.0,
+              "n_incidents": 2
+            },
+            "total_bad_runs": 0
+          }
+        },
+        "config": {
+          "ground_truth_path": "/home/agentbeats/itbench_eval/Scenarios",
+          "outputs_path": "outputs",
+          "eval_criteria": [
+            "ROOT_CAUSE_ENTITY",
+            "ROOT_CAUSE_REASONING",
+            "PROPAGATION_CHAIN",
+            "FAULT_LOCALIZATION",
+            "ROOT_CAUSE_REASONING_PARTIAL",
+            "ROOT_CAUSE_PROXIMITY",
+            "ROOT_CAUSE_PROXIMITY_FP"
+          ],
+          "k": 3
+        }
+      }
+    }
+  ]
+}
