@@ -13,3 +13,5 @@ The ITBench evaluator serves observability data (alerts, metrics, logs, k8s obje
 
 
 Model Provider and URL for the agent and the evaluator should be set as github repo variables. API Keys should be github repo secrets.
+
+For final runs please use 5 trials. The evaluator model should always be Gemini 3 Pro Preview.
