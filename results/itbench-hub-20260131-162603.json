@@ -1,0 +1,623 @@
+{
+  "participants": {
+    "agent": "019c100a-630f-71d0-aeff-cb5811bf6de4"
+  },
+  "results": [
+    {
+      "scenarios_evaluated": 2,
+      "time_used": 155.7133824825287,
+      "evaluation_results": {
+        "raw_results": [
+          {
+            "scenario_index": 0,
+            "scores": {
+              "root_cause_entity": {
+                "gt_entities": [
+                  "load-generator-pod-1"
+                ],
+                "predicted_entities": [
+                  {
+                    "entity": "kube-system/Service/kube-api-server",
+                    "matches_gt": false
+                  }
+                ],
+                "calculation_precision": 0.0,
+                "calculation_recall": 0.0,
+                "calculation_f1": 0,
+                "justification": "The Ground Truth identifies the root cause as 'load-generator-pod-1' (and its aliases including 'frontend-proxy-service-1'). The model predicted 'kube-system/Service/kube-api-server' as the contributing factor, which does not match the ground truth or any of its aliases. The model listed 'frontend-proxy' but explicitly marked it as 'contributing_factor: false'."
+              },
+              "root_cause_reasoning": {
+                "calculation": 0,
+                "justification": "No root cause entities were correctly identified, so the reasoning score is 0.",
+                "details": {}
+              },
+              "propagation_chain": {
+                "justification": "The F1-score is calculated based on the semantic components. The GT path describes a flow from the Load Generator to the Frontend Proxy. The model describes a flow from the Kube API Server through the Controller Manager to the Frontend Proxy and downstream. The Longest Common Subsequence (LCS) is 'Frontend Proxy Component'.",
+                "details": {
+                  "normalization_map": {
+                    "otel-demo/Service/frontend-proxy": "frontend-proxy-service-1"
+                  },
+                  "semantic_components": {
+                    "Load Generator Component": [
+                      "load-generator-pod-1",
+                      "load-generator-service-1"
+                    ],
+                    "Frontend Proxy Component": [
+                      "frontend-proxy-service-1",
+                      "frontend-proxy-pod-1",
+                      "otel-demo/Service/frontend-proxy"
+                    ],
+                    "Kube API Component": [
+                      "kube-system/Service/kube-api-server"
+                    ],
+                    "Kube Controller Component": [
+                      "kube-system/Pod/kube-controller-manager"
+                    ],
+                    "Frontend Component": [
+                      "otel-demo/Deployment/frontend"
+                    ],
+                    "Product Catalog Component": [
+                      "otel-demo/Deployment/product-catalog"
+                    ]
+                  },
+                  "contracted_gt_path": [
+                    "Load Generator Component",
+                    "Frontend Proxy Component"
+                  ],
+                  "contracted_model_path": [
+                    "Kube API Component",
+                    "Kube Controller Component",
+                    "Frontend Proxy Component",
+                    "Frontend Component",
+                    "Product Catalog Component"
+                  ],
+                  "lcs_components": [
+                    "Frontend Proxy Component"
+                  ],
+                  "true_positives_TP": 1,
+                  "model_path_length": 5,
+                  "gt_path_length": 2
+                },
+                "precision": 0.2,
+                "recall": 0.5,
+                "calculation": 0.28571428571428575
+              },
+              "fault_localization_component_identification": {
+                "calculation": 1,
+                "justification": "The first performance failure in GT.propagations is: 'frontend-proxy service error rate is above threshold'. Using Priority 1 rule (Explicit Component in Effect), the first impacted component is 'Frontend Proxy Component' (derived from 'frontend-proxy service'). This component was found in the model's contracted path.",
+                "details": {
+                  "gt_first_impacted_component": "Frontend Proxy Component",
+                  "effect_used": "frontend-proxy service error rate is above threshold",
+                  "priority_rule_applied": "Priority 1",
+                  "found_in_model_path": true
+                }
+              },
+              "root_cause_reasoning_partial": {
+                "calculation": 0,
+                "justification": "The model failed to identify the root cause. It did identify a symptom component ('Frontend Proxy Component') which is 1 hop away from the true root cause ('Load Generator Component') on the GT path. However, the reasoning provided ('Loss of control plane management') is incorrect compared to the ground truth ('overloaded - request volume'), resulting in a SymptomReasoningCorrectness of 0.",
+                "details": [
+                  {
+                    "entity": "kube-system/Service/kube-api-server",
+                    "metric1_is_correct": false,
+                    "hop_away": 1,
+                    "SymptomReasoningCorrectness": 0,
+                    "entity_score": 0.0
+                  }
+                ]
+              },
+              "root_cause_proximity_no_fp": {
+                "calculation_precision": 0.0,
+                "calculation_recall": 0.0,
+                "calculation_f1": 0,
+                "justification": "The model's predicted root cause ('Kube API Component') is not present on the contracted GT path, resulting in a precision score of 0. The GT root cause ('Load Generator Component') is not present on the contracted model path, resulting in a recall score of 0.",
+                "precision_details": [
+                  {
+                    "entity": "kube-system/Service/kube-api-server",
+                    "is_on_path": false,
+                    "hop_away": null,
+                    "entity_score": 0
+                  }
+                ],
+                "recall_details": [
+                  {
+                    "gt_entity": "load-generator-pod-1",
+                    "is_on_path": false,
+                    "hop_away": null,
+                    "entity_score": 0
+                  }
+                ]
+              },
+              "root_cause_proximity_with_fp": {
+                "gt_path_length": 2,
+                "calculation_precision": 0.0,
+                "calculation_recall": 0.0,
+                "calculation_f1": 0,
+                "justification": "The model's predicted root cause is not on the contracted GT path, and the GT root cause is not on the contracted model path. According to the rubric, if an entity is not on the path, its score is 0.",
+                "precision_details": [
+                  {
+                    "entity": "kube-system/Service/kube-api-server",
+                    "is_on_path": false,
+                    "hop_away": null,
+                    "entity_score": 0
+                  }
+                ],
+                "recall_details": [
+                  {
+                    "gt_entity": "load-generator-pod-1",
+                    "is_on_path": false,
+                    "hop_away": null,
+                    "entity_score": 0
+                  }
+                ]
+              },
+              "root_cause_entity_k": {
+                "calculation_precision": 0.0,
+                "calculation_recall": 0.0,
+                "calculation_f1": 0.0
+              },
+              "root_cause_entity_k@1": {
+                "calculation_precision": 0.0,
+                "calculation_recall": 0.0,
+                "calculation_f1": 0.0
+              },
+              "root_cause_entity_k@2": {
+                "calculation_precision": 0.0,
+                "calculation_recall": 0.0,
+                "calculation_f1": 0.0
+              },
+              "root_cause_entity_k@3": {
+                "calculation_precision": 0.0,
+                "calculation_recall": 0.0,
+                "calculation_f1": 0.0
+              },
+              "root_cause_entity_k@4": {
+                "calculation_precision": 0.0,
+                "calculation_recall": 0.0,
+                "calculation_f1": 0.0
+              },
+              "root_cause_entity_k@5": {
+                "calculation_precision": 0.0,
+                "calculation_recall": 0.0,
+                "calculation_f1": 0.0
+              }
+            },
+            "incident_id": "1",
+            "trial_id": "1"
+          },
+          {
+            "scenario_index": 0,
+            "scores": {
+              "root_cause_entity": {
+                "gt_entities": [
+                  "checkout-pod-1"
+                ],
+                "predicted_entities": [
+                  {
+                    "entity": "kube-system/Service/kubernetes-api",
+                    "matches_gt": false
+                  }
+                ],
+                "calculation_precision": 0.0,
+                "calculation_recall": 0.0,
+                "calculation_f1": 0,
+                "justification": "The Ground Truth identifies 'checkout-pod-1' (and its alias 'checkout-service-1') as the root cause. The model predicted 'kube-system/Service/kubernetes-api'. There is no match."
+              },
+              "root_cause_reasoning": {
+                "calculation": 0,
+                "justification": "No root cause entities were correctly identified, so the reasoning score is 0.",
+                "details": {}
+              },
+              "propagation_chain": {
+                "justification": "The F1-score is 0 because there is no overlap between the model's path and the ground truth path. The model describes a control plane failure (API -> Scheduler/Controller -> Frontend), while the ground truth describes a specific service failure (Checkout).",
+                "details": {
+                  "normalization_map": {},
+                  "semantic_components": {
+                    "Checkout Service Component": [
+                      "checkout-pod-1",
+                      "checkout-service-1"
+                    ],
+                    "Kubernetes API Component": [
+                      "kube-system/Service/kubernetes-api"
+                    ],
+                    "Kube Scheduler Component": [
+                      "kube-system/Pod/kube-scheduler"
+                    ],
+                    "Kube Controller Manager Component": [
+                      "kube-system/Pod/kube-controller-manager"
+                    ],
+                    "Frontend Proxy Component": [
+                      "otel-demo/Deployment/frontend-proxy"
+                    ]
+                  },
+                  "contracted_gt_path": [
+                    "Checkout Service Component"
+                  ],
+                  "contracted_model_path": [
+                    "Kubernetes API Component",
+                    "Kube Controller Manager Component",
+                    "Frontend Proxy Component"
+                  ],
+                  "lcs_components": [],
+                  "true_positives_TP": 0,
+                  "model_path_length": 3,
+                  "gt_path_length": 1
+                },
+                "precision": 0.0,
+                "recall": 0.0,
+                "calculation": 0
+              },
+              "fault_localization_component_identification": {
+                "calculation": 0,
+                "justification": "The propagation effect in the Ground Truth is empty, so applying Priority 4 (Default to Target), the impacted component is 'checkout-service-1', which belongs to the 'Checkout Service Component'. This component is not present in the model's contracted path.",
+                "details": {
+                  "gt_first_impacted_component": "Checkout Service Component",
+                  "effect_used": "",
+                  "priority_rule_applied": "Priority 4 - Default to Target",
+                  "found_in_model_path": false
+                }
+              },
+              "root_cause_reasoning_partial": {
+                "calculation": 0,
+                "justification": "The model's predicted root cause entity 'kube-system/Service/kubernetes-api' belongs to the 'Kubernetes API Component'. This component does not exist on the contracted Ground Truth path, so no partial credit is awarded.",
+                "details": [
+                  {
+                    "entity": "kube-system/Service/kubernetes-api",
+                    "metric1_is_correct": false,
+                    "hop_away": null,
+                    "SymptomReasoningCorrectness": null,
+                    "entity_score": 0
+                  }
+                ]
+              },
+              "root_cause_proximity_no_fp": {
+                "calculation_precision": 0.0,
+                "calculation_recall": 0.0,
+                "calculation_f1": 0,
+                "justification": "The model's predicted root cause component is not on the ground truth path, and the ground truth root cause component is not on the model's path. Therefore, all proximity scores are 0.",
+                "precision_details": [
+                  {
+                    "entity": "kube-system/Service/kubernetes-api",
+                    "is_on_path": false,
+                    "hop_away": null,
+                    "entity_score": 0
+                  }
+                ],
+                "recall_details": [
+                  {
+                    "gt_entity": "checkout-pod-1",
+                    "is_on_path": false,
+                    "hop_away": null,
+                    "entity_score": 0
+                  }
+                ]
+              },
+              "root_cause_proximity_with_fp": {
+                "gt_path_length": 1,
+                "calculation_precision": 0.0,
+                "calculation_recall": 0.0,
+                "calculation_f1": 0,
+                "justification": "The model's predicted root cause component is not on the ground truth path, and the ground truth root cause component is not on the model's path. Therefore, all proximity scores are 0.",
+                "precision_details": [
+                  {
+                    "entity": "kube-system/Service/kubernetes-api",
+                    "is_on_path": false,
+                    "hop_away": null,
+                    "entity_score": 0
+                  }
+                ],
+                "recall_details": [
+                  {
+                    "gt_entity": "checkout-pod-1",
+                    "is_on_path": false,
+                    "hop_away": null,
+                    "entity_score": 0
+                  }
+                ]
+              },
+              "root_cause_entity_k": {
+                "calculation_precision": 0.0,
+                "calculation_recall": 0.0,
+                "calculation_f1": 0.0
+              },
+              "root_cause_entity_k@1": {
+                "calculation_precision": 0.0,
+                "calculation_recall": 0.0,
+                "calculation_f1": 0.0
+              },
+              "root_cause_entity_k@2": {
+                "calculation_precision": 0.0,
+                "calculation_recall": 0.0,
+                "calculation_f1": 0.0
+              },
+              "root_cause_entity_k@3": {
+                "calculation_precision": 0.0,
+                "calculation_recall": 0.0,
+                "calculation_f1": 0.0
+              },
+              "root_cause_entity_k@4": {
+                "calculation_precision": 0.0,
+                "calculation_recall": 0.0,
+                "calculation_f1": 0.0
+              },
+              "root_cause_entity_k@5": {
+                "calculation_precision": 0.0,
+                "calculation_recall": 0.0,
+                "calculation_f1": 0.0
+              }
+            },
+            "incident_id": "23",
+            "trial_id": "1"
+          }
+        ],
+        "statistics": {
+          "per_incident": {
+            "1": {
+              "root_cause_entity_precision": {
+                "mean": 0.0,
+                "stderr": 0.0,
+                "n": 1
+              },
+              "root_cause_entity_recall": {
+                "mean": 0.0,
+                "stderr": 0.0,
+                "n": 1
+              },
+              "root_cause_entity_f1": {
+                "mean": 0.0,
+                "stderr": 0.0,
+                "n": 1
+              },
+              "root_cause_entity_k_precision": {
+                "mean": 0.0,
+                "stderr": 0.0,
+                "n": 1
+              },
+              "root_cause_entity_k_recall": {
+                "mean": 0.0,
+                "stderr": 0.0,
+                "n": 1
+              },
+              "root_cause_entity_k_f1": {
+                "mean": 0.0,
+                "stderr": 0.0,
+                "n": 1
+              },
+              "root_cause_reasoning": {
+                "mean": 0.0,
+                "stderr": 0.0,
+                "n": 1
+              },
+              "propagation_chain": {
+                "mean": 0.28571428571428575,
+                "stderr": 0.0,
+                "n": 1
+              },
+              "fault_localization_component_identification": {
+                "mean": 1.0,
+                "stderr": 0.0,
+                "n": 1,
+                "pass@1": 1.0
+              },
+              "root_cause_reasoning_partial": {
+                "mean": 0.0,
+                "stderr": 0.0,
+                "n": 1
+              },
+              "root_cause_proximity_no_fp_precision": {
+                "mean": 0.0,
+                "stderr": 0.0,
+                "n": 1
+              },
+              "root_cause_proximity_no_fp_recall": {
+                "mean": 0.0,
+                "stderr": 0.0,
+                "n": 1
+              },
+              "root_cause_proximity_no_fp_f1": {
+                "mean": 0.0,
+                "stderr": 0.0,
+                "n": 1
+              },
+              "root_cause_proximity_with_fp_precision": {
+                "mean": 0.0,
+                "stderr": 0.0,
+                "n": 1
+              },
+              "root_cause_proximity_with_fp_recall": {
+                "mean": 0.0,
+                "stderr": 0.0,
+                "n": 1
+              },
+              "root_cause_proximity_with_fp_f1": {
+                "mean": 0.0,
+                "stderr": 0.0,
+                "n": 1
+              }
+            },
+            "23": {
+              "root_cause_entity_precision": {
+                "mean": 0.0,
+                "stderr": 0.0,
+                "n": 1
+              },
+              "root_cause_entity_recall": {
+                "mean": 0.0,
+                "stderr": 0.0,
+                "n": 1
+              },
+              "root_cause_entity_f1": {
+                "mean": 0.0,
+                "stderr": 0.0,
+                "n": 1
+              },
+              "root_cause_entity_k_precision": {
+                "mean": 0.0,
+                "stderr": 0.0,
+                "n": 1
+              },
+              "root_cause_entity_k_recall": {
+                "mean": 0.0,
+                "stderr": 0.0,
+                "n": 1
+              },
+              "root_cause_entity_k_f1": {
+                "mean": 0.0,
+                "stderr": 0.0,
+                "n": 1
+              },
+              "root_cause_reasoning": {
+                "mean": 0.0,
+                "stderr": 0.0,
+                "n": 1
+              },
+              "propagation_chain": {
+                "mean": 0.0,
+                "stderr": 0.0,
+                "n": 1
+              },
+              "fault_localization_component_identification": {
+                "mean": 0.0,
+                "stderr": 0.0,
+                "n": 1,
+                "pass@1": 0.0
+              },
+              "root_cause_reasoning_partial": {
+                "mean": 0.0,
+                "stderr": 0.0,
+                "n": 1
+              },
+              "root_cause_proximity_no_fp_precision": {
+                "mean": 0.0,
+                "stderr": 0.0,
+                "n": 1
+              },
+              "root_cause_proximity_no_fp_recall": {
+                "mean": 0.0,
+                "stderr": 0.0,
+                "n": 1
+              },
+              "root_cause_proximity_no_fp_f1": {
+                "mean": 0.0,
+                "stderr": 0.0,
+                "n": 1
+              },
+              "root_cause_proximity_with_fp_precision": {
+                "mean": 0.0,
+                "stderr": 0.0,
+                "n": 1
+              },
+              "root_cause_proximity_with_fp_recall": {
+                "mean": 0.0,
+                "stderr": 0.0,
+                "n": 1
+              },
+              "root_cause_proximity_with_fp_f1": {
+                "mean": 0.0,
+                "stderr": 0.0,
+                "n": 1
+              }
+            }
+          },
+          "overall": {
+            "root_cause_entity_precision": {
+              "mean": 0.0,
+              "stderr": 0.0,
+              "n_incidents": 2
+            },
+            "root_cause_entity_recall": {
+              "mean": 0.0,
+              "stderr": 0.0,
+              "n_incidents": 2
+            },
+            "root_cause_entity_f1": {
+              "mean": 0.0,
+              "stderr": 0.0,
+              "n_incidents": 2
+            },
+            "root_cause_entity_k_precision": {
+              "mean": 0.0,
+              "stderr": 0.0,
+              "n_incidents": 2
+            },
+            "root_cause_entity_k_recall": {
+              "mean": 0.0,
+              "stderr": 0.0,
+              "n_incidents": 2
+            },
+            "root_cause_entity_k_f1": {
+              "mean": 0.0,
+              "stderr": 0.0,
+              "n_incidents": 2
+            },
+            "root_cause_reasoning": {
+              "mean": 0.0,
+              "stderr": 0.0,
+              "n_incidents": 2
+            },
+            "propagation_chain": {
+              "mean": 0.14285714285714288,
+              "stderr": 0.14285714285714285,
+              "n_incidents": 2
+            },
+            "fault_localization_component_identification": {
+              "mean": 0.5,
+              "stderr": 0.5,
+              "n_incidents": 2,
+              "pass@1": 0.5
+            },
+            "root_cause_reasoning_partial": {
+              "mean": 0.0,
+              "stderr": 0.0,
+              "n_incidents": 2
+            },
+            "root_cause_proximity_no_fp_precision": {
+              "mean": 0.0,
+              "stderr": 0.0,
+              "n_incidents": 2
+            },
+            "root_cause_proximity_no_fp_recall": {
+              "mean": 0.0,
+              "stderr": 0.0,
+              "n_incidents": 2
+            },
+            "root_cause_proximity_no_fp_f1": {
+              "mean": 0.0,
+              "stderr": 0.0,
+              "n_incidents": 2
+            },
+            "root_cause_proximity_with_fp_precision": {
+              "mean": 0.0,
+              "stderr": 0.0,
+              "n_incidents": 2
+            },
+            "root_cause_proximity_with_fp_recall": {
+              "mean": 0.0,
+              "stderr": 0.0,
+              "n_incidents": 2
+            },
+            "root_cause_proximity_with_fp_f1": {
+              "mean": 0.0,
+              "stderr": 0.0,
+              "n_incidents": 2
+            },
+            "total_bad_runs": 0
+          }
+        },
+        "config": {
+          "ground_truth_path": "/home/agentbeats/itbench_eval/Scenarios",
+          "outputs_path": "outputs",
+          "eval_criteria": [
+            "ROOT_CAUSE_ENTITY",
+            "ROOT_CAUSE_REASONING",
+            "PROPAGATION_CHAIN",
+            "FAULT_LOCALIZATION",
+            "ROOT_CAUSE_REASONING_PARTIAL",
+            "ROOT_CAUSE_PROXIMITY",
+            "ROOT_CAUSE_PROXIMITY_FP"
+          ],
+          "k": 3
+        }
+      }
+    }
+  ]
+}
